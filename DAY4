@@ -1,0 +1,44 @@
+// IMPLEMENTATION OF 4-bit RIPPLE CARRY
+
+******* VERILOG CODE ********
+module Full_Adder(A,B,Cin,Sum,Cout);
+  input A,B,Cin;
+  output Sum,Cout;
+  
+  assign Sum=A^B^Cin;
+  assign Cout=(A&B)|(B&Cin)|(Cin&A);
+endmodule
+
+module Ripple_Carry_adder(A,B,Cin,Sum,Cout);
+  input [3:0]A,B;
+  input Cin;
+  output [3:0]Cout,Sum;
+  
+  wire c1,c2,c3;
+  Full_Adder FA1(A[0],B[0],Cin,Sum[0],c1);
+  Full_Adder FA2(A[1],B[1],c1,Sum[1],c2);
+  Full_Adder FA3(A[2],B[2],c2,Sum[2],c3);
+  Full_Adder FA4(A[3],B[3],c3,Sum[3],Cout);
+endmodule
+  
+******* TESTBENCH CODE *******
+module testbench();
+  reg [3:0]A,B;
+  reg Cin;
+  wire [3:0]Sum;
+  wire Cout;
+  
+  Ripple_Carry_adder tb(A,B,Cin,Sum,Cout);
+  initial
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars(1,testbench);
+      
+      $monitor("Time=%0t | A=%b | B=%b | Cin=%b | Sum=%b | Cout=%b",$time,A,B,Cin,Sum,Cout);
+      A=4'b0000;B=4'b0001;Cin=0;
+      #10A=4'b0001;B=4'b0011;Cin=1;
+      #10A=4'b1001;B=4'b1111;Cin=0;
+      #10A=4'b1111;B=4'b0000;Cin=1;
+      #10 $finish;
+    end
+  endmodule
