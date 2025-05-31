@@ -1,0 +1,37 @@
+// IMPLEMENTATION OF 2X1 MUX
+
+******* VERILOG CODE *******
+module Mux(A,B,S,Y);
+  input A,B,S;
+  output reg Y;
+  
+  assign Y=((!S)*A)||(S*B);
+  
+//   always @(*)begin
+//     case(S)
+//       1'b0 :Y<=A;
+//       1'b1 :Y<=B;
+//     endcase
+//   end
+endmodule
+
+******* TESTBENCH CODE *********
+module testbench();
+  reg A,B,S;
+  wire Y;
+  
+  Mux tb(A,B,S,Y);
+  initial
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars(1,testbench);
+      
+      $monitor("Time=%0t | A=%b | B=%b | S=%b | Y=%b ",$time,A,B,S,Y);
+      A=0;B=0;S=0;
+      #10A=0;B=1;S=1;
+      #10A=1;B=0;S=0;
+      #10A=1;B=1;S=1;
+      #10 $finish;
+    end
+endmodule
+      
