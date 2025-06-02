@@ -1,0 +1,55 @@
+// IMPLEMENTATION OF 4-BIT MAGNITUDE COMPARATOR
+
+********* VERILOG CODE *********
+module comparator(A,B,Y_greater,Y_lesser,Y_equal);
+  input [3:0] A,B;
+  output reg Y_greater,Y_lesser,Y_equal;
+  
+  always @(*) begin
+    if(A==B) begin
+      Y_equal=1;
+      Y_greater=0;
+      Y_lesser=0;
+    end
+    else if(A>B) begin
+      Y_greater=1;
+      Y_equal=0;
+      Y_lesser=0;
+    end
+    else begin
+      Y_lesser=1;
+      Y_greater=0;
+      Y_equal=0;
+    end
+  end
+endmodule
+
+
+
+************ TESTBENCH CODE ************
+module testbench();
+  reg [3:0]A,B;
+  wire Y_greater,Y_lesser,Y_equal;
+  
+  comparator tb(A,B,Y_greater,Y_lesser,Y_equal);
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t | A=%b | B=%b | Y_greater=%b | Y_lesser=%b | Y_equal=%b ",$time,A,B,Y_greater,Y_lesser,Y_equal);
+    
+    A=4'b0000;B=4'b0001;
+    #10;
+    A=4'b1111;B=4'b1111;
+    #10; 
+    A=4'b1111;B=4'b1100;
+    #10; 
+    $finish;
+  end
+endmodule
+                                                                                                   
+                                                                                                   
+                                              
+                                                                                                   
+                                                                                                   
