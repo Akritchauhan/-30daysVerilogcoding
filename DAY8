@@ -1,0 +1,39 @@
+// Implementation of D-FF
+
+********** VERILOG CODE ************
+module D_FF(d,rst,clk,y);
+  input wire d,rst,clk;
+  output reg y;
+  
+  always @(posedge clk) begin
+    if(rst)begin
+      y<=0;
+    end
+    else begin
+      y<=d;
+  end
+  end
+endmodule
+
+************ TESTBENCH CODE ***************
+module testbench();
+  reg d,clk,rst;
+  wire y;
+  
+  D_FF tb(d,rst,clk,y);
+  
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    $monitor("Time=%0t | rst=%b | d=%b | y=%b ",$time,rst,d,y);
+    rst=1;d=0;
+    #5 rst=1;d=1;
+    #5 rst=0;d=0;
+    #5 rst=0;d=1;
+    #5 $finish;
+  end
+endmodule
+    
