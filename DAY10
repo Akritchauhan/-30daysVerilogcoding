@@ -1,0 +1,49 @@
+// IMPLEMENTATION OF T-FF
+
+********** VERILOG CODE ****************
+module T_FF(T,rst,clk,q,y);
+  input T,rst,clk,q;
+  output reg y;
+  
+  always@(posedge clk) begin
+    if(rst)begin
+      y<=0;
+    end
+    else begin
+      if(T==0)
+        y<=q;
+      else
+        y<=~q;
+    end
+  end
+endmodule
+
+************** TESTBENCH CODE ***************
+module testbench();
+  reg T,rst,clk,q;
+  wire y;
+  
+  T_FF tb(T,rst,clk,q,y);
+  
+  initial clk=0;
+  always #10 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t | T=%b | rst=%b | Qn=%b | Qn+1=%b",$time,T,rst,q,y);
+    
+     rst=1;T=0;q=0;
+    #10 rst=0;T=0;q=0;
+    #10 rst=0;T=0;q=1;
+    #10 rst=0;T=1;q=0;
+    #10 rst=0;T=1;q=1;
+    
+    #10 $finish;
+  end
+endmodule
+
+        
+
+    
