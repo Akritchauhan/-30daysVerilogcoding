@@ -1,0 +1,41 @@
+// Implementation of 4-bit register
+
+************ VERILOG CODE *****************
+module Register(d,clk,en,q,y);
+  input [3:0]d,q;
+  input clk,en;
+  output reg [3:0]y;
+  
+  always @(posedge clk)begin
+    if(en)begin
+      y<=d;
+    end
+    else begin
+      y<=q;
+    end
+  end
+endmodule
+  
+*************** TESTBENCH CODE ****************
+module testbench();
+  reg [3:0]d,q;
+  reg clk,en;
+  wire [3:0]y;
+  
+  Register tb(d,clk,en,q,y);
+  
+  initial clk=0;
+  always #10 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    #10 $monitor("Time=%0t | D=%b | Enable=%b | Qn=%b | Qn+1=%b",$time,d,en,q,y);
+    
+    en=0;d=4'b0100;q=0100;
+    #10 en=1;q=4'b0010;d=4'b0100;
+    
+    #10 $finish;
+  end
+endmodule
