@@ -1,0 +1,55 @@
+// IMPLEMENTATION OF SYNCHRONOUS UP COUNTER
+
+************* VERILOG CODE *************
+module D_FF(d,clk,rst,q);
+  input d,clk,rst;
+  output reg q;
+  always @(posedge clk) begin
+    if(rst)begin
+      q<=0;
+    end
+    else begin
+      q<=d;
+    end
+  end
+endmodule
+
+module sync_up_counter(clk,rst,q);
+  input clk,rst;
+  output [3:0] q;
+  reg [3:0] d;
+  wire [3:0] q_internal;
+  D_FF D0(d[0], clk, rst, q_internal[0]);
+  D_FF D1(d[1], clk, rst, q_internal[1]);
+  D_FF D2(d[2], clk, rst, q_internal[2]);
+  D_FF D3(d[3], clk, rst, q_internal[3]);
+
+  assign q = q_internal;
+  always @(*) begin
+    d = q_internal + 1;
+  end
+endmodule
+
+
+***************** TESTBENCH CODE ***********
+module testbench();
+
+reg clk,rst;
+wire [3:0] q;
+
+  sync_up_counter tb (clk,rst,q);
+
+initial clk = 0;
+always #5 clk = ~clk;
+
+initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars(1,testbench);
+  
+  $monitor("Time=%0t | Q=%b",$time,q);
+    rst = 1;
+    #10 rst = 0;
+   
+    #160 $finish;
+end
+endmodule
