@@ -1,0 +1,61 @@
+// IMPLEMENTATION OF UP/DOWN COUNTER
+
+*********** VERILOG CODE ***************
+module D_FF(d, clk, rst, q);
+  input d, clk, rst;
+  output reg q;
+  always @(posedge clk) begin
+    if (rst)
+      q <= 0;
+    else
+      q <= d;
+  end
+endmodule
+
+module UP_Down_counter(dir, clk, rst, q);
+  input dir, clk, rst;
+  output [3:0]q;
+  reg [3:0] d;
+  wire [3:0] q_internal;
+
+  D_FF D0(d[0], clk, rst, q_internal[0]);
+  D_FF D1(d[1], clk, rst, q_internal[1]);
+  D_FF D2(d[2], clk, rst, q_internal[2]);
+  D_FF D3(d[3], clk, rst, q_internal[3]);
+
+  assign q = q_internal;
+
+  always @(*) begin
+    if (dir)
+      d = q_internal + 1;  // count up
+    else
+      d = q_internal - 1;  // count down
+  end
+endmodule
+
+
+************ TESTBENCH CODE *************
+module testbench();
+  reg dir, clk, rst;
+  wire [3:0]q;
+  
+  UP_Down_counter tb(dir, clk, rst, q);
+  
+  initial begin
+    rst = 1; dir = 1;
+  end
+  
+  initial clk = 0;
+  always #5 clk = ~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1, testbench);
+    
+    $monitor("Time=%0t | rst=%b | direction=%b | Q=%b", $time, rst, dir, q);
+    
+    #10 rst = 0; dir= 1;   // Start with UP count
+    #80 dir = 0;            // Switch to DOWN count after 80 time units
+    #80 $finish;
+  end
+endmodule
