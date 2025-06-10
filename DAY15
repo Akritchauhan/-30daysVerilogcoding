@@ -1,0 +1,110 @@
+// IMPLEMENTATION OF SHIFT REGISTERS (SISO AND SIPO)
+
+******** VERILOG CODE *********
+ 1.SISO
+---------------------------------------------------
+module D_FF(d,clk,rst,q);
+  input d,clk,rst;
+  output reg q;
+  
+  always @(posedge clk)begin
+    if(rst)begin
+      q<=0;
+    end
+    else begin
+      q<=d;
+    end
+  end
+endmodule
+
+module Shift_Register_SISO(d,clk,rst,q);
+  input clk,rst,d;
+  output reg[3:0]q;
+  wire [3:0]q_internal;
+  
+  assign q=q_internal[3];
+  
+  D_FF D0(d,clk,rst,q_internal[0]);
+  D_FF D1(q_internal[0],clk,rst,q_internal[1]);
+  D_FF D2(q_internal[1],clk,rst,q_internal[2]);
+  D_FF D3(q_internal[2],clk,rst,q_internal[3]);
+endmodule
+
+2.SIPO
+----------------------------------------
+module D_FF(d,clk,rst,q);
+  input d,clk,rst;
+  output reg q;
+  
+  always @(posedge clk)begin
+    if(rst)begin
+      q<=0;
+    end
+    else begin
+      q<=d;
+    end
+  end
+endmodule
+
+module Shift_Register_SIPO(d,clk,rst,q);
+  input clk,rst,d;
+  output reg[3:0]q;
+  wire [3:0]q_internal;
+  
+  assign q=q_internal;
+  
+  D_FF D0(d,clk,rst,q_internal[0]);
+  D_FF D1(q_internal[0],clk,rst,q_internal[1]);
+  D_FF D2(q_internal[1],clk,rst,q_internal[2]);
+  D_FF D3(q_internal[2],clk,rst,q_internal[3]);
+endmodule
+  
+
+******** TESTBENCH CODE **************
+1.SISO
+-------------------------------
+module testbench();
+  reg clk,rst,d;
+  wire [3:0]q;
+  
+  Shift_Register_SISO tb(d,clk,rst,q);
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    #5 $monitor("Time=%0t | rst=%b | d=%b | q=%b",$time,rst,d,q[0]);
+    rst=0;
+    #10 d=0;
+    #10 d=1;
+    #10 d=0;
+    #10 d=1;
+    #100 $finish;
+  end
+endmodule
+
+2.SIPO
+--------------------------------
+module testbench();
+  reg clk,rst,d;
+  wire [3:0]q;
+  
+  Shift_Register_SIPO tb(d,clk,rst,q);
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    #5 $monitor("Time=%0t | rst=%b | d=%b | q=%b",$time,rst,d,q);
+    rst=0;
+    #10 d=0;
+    #10 d=1;
+    #10 d=0;
+    #10 d=1;
+    $finish;
+  end
+endmodule
