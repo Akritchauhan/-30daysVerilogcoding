@@ -1,0 +1,64 @@
+//IMPLEMENTATION OF JOHNSON RING COUNTER
+
+********** VERILOG CODE ***************
+module johnson_counter(clk,rst,q);
+  input clk,rst;
+  output reg[3:0]q;
+  
+  typedef enum reg[3:0] {
+  S0 = 4'b0000,
+  S1 = 4'b1000,
+  S2 = 4'b1100,
+  S3 = 4'b1110,
+  S4 = 4'b1111,
+  S5 = 4'b0111,
+  S6 = 4'b0011,
+  S7 = 4'b0001
+} state_t;
+  
+  state_t state;
+  always @(posedge clk)begin
+    if(rst)
+      state<=4'd0;
+    else begin
+      case(state)
+       S0: state<=S1;
+       S1: state<=S2;
+       S2: state<=S3;
+       S3: state<=S4;
+       S4: state<=S5;
+       S5: state<=S6;
+       S6: state<=S7;
+       S7: state<=S0;
+       default : state<=S0;
+      endcase
+    end
+  end
+  
+  always @(*)begin
+    q<=state;
+  end
+endmodule
+
+************** TESTBENCH CODE *****************
+module testbench();
+  reg clk,rst;
+  wire [3:0]q;
+  
+  johnson_counter tb(clk,rst,q);
+  
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t | rst=%b | q=%b",$time,rst,q);
+    
+    rst=1;
+    #10 rst=0;
+    
+    #100 $finish;
+  end
+endmodule
