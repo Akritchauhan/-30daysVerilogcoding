@@ -1,0 +1,69 @@
+// IMPLEMENTATION OF TRAFFIC LIGHT CONTROLLER
+
+************ VERILOG CODE *********************
+module light_controller #(
+  parameter green_time = 10, 
+  parameter yellow_time = 3, 
+  parameter red_time = 5
+)(
+  input clk, rst,
+  output reg [2:0] q
+);
+
+  typedef enum reg [2:0] {
+    s0 = 3'b100,  // red
+    s1 = 3'b010,  // yellow
+    s2 = 3'b001   // green
+  } state_t;
+
+  state_t state;
+  reg [3:0] count;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      state <= s0; 
+      count <= 0;
+    end else begin
+      if ((state == s0 && count == red_time - 1) || 
+          (state == s1 && count == yellow_time - 1) || 
+          (state == s2 && count == green_time - 1)) begin
+        case (state)
+          s0: state <= s1;  
+          s1: state <= s2;  
+          s2: state <= s0;  
+          default: state <= s0;
+        endcase
+        count <= 0; 
+      end else begin
+        count <= count + 1;
+      end
+    end
+  end
+
+  always @(*) begin
+    q = state;  
+  end
+
+endmodule
+
+************** TESTBENCH CODE *************
+    module testbench();
+  reg clk,rst;
+  wire [2:0]q;
+  
+  light_controller tb(clk,rst,q);
+  
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t| rst=%0b | red=%b | yellow=%b | green=%b",$time,rst,q[2],q[1],q[0]);
+    rst=1;
+    
+   #10 rst=0;
+    #200 $finish;
+  end
+endmodule
