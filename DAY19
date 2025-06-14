@@ -1,0 +1,66 @@
+// IMPLEMENTATION OF SEQUENCE DETECTOR(1011)
+
+*********** VERILOG CODE ***********
+module sequence_detector(
+  input d,
+  input clk,
+  input rst,
+  output reg q
+);
+
+  typedef enum reg [3:0] {
+    s0 = 4'b0000, 
+    s1 = 4'b0001, 
+    s2 = 4'b0010,
+    s3 = 4'b0011, 
+    s4 = 4'b0100  
+  } state_t;
+
+  state_t state;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      state <= s0;
+    end else begin
+      case (state)
+        s0: state <= (d == 1) ? s1 : s0;
+        s1: state <= (d == 0) ? s2 : s1;
+        s2: state <= (d == 1) ? s3 : s2;
+        s3: state <= (d == 1) ? s4 : s2;
+        s4: state <= (d == 1) ? s1 : s0; 
+        default: state <= s0;
+      endcase
+    end
+  end
+
+  always @(*) begin
+    q = (state == s4) ? 1 : 0;
+  end
+
+endmodule
+
+*********** TESTBENCH CODE **************
+module testbench();
+  reg d,clk,rst;
+  wire q;
+  
+  sequence_detector tb(d,clk,rst,q);
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t | rst=%0b | d=%0b | q=%0b",$time,rst,d,q);
+     rst = 1; d = 0;
+    #10 rst = 0;
+
+    #10 d = 1;
+    #10 d = 0;
+    #10 d = 1;
+    #10 d = 1;
+
+    #10 $finish;
+  end
+endmodule
