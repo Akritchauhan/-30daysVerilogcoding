@@ -1,0 +1,49 @@
+// IMPLEMENTATION OF PULSE GENERATOR
+
+******* VERILOG CODE **********
+module pulse_generator #(parameter n = 5)(
+  input clk,
+  input rst,
+  output reg q
+);
+
+  reg [$clog2(n)-1:0] counter;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      counter <= 0;
+      q <= 0;
+    end else begin
+      if (counter == n - 1) begin
+        counter <= 0;
+        q <= 1;
+      end else begin
+        counter <= counter + 1;
+        q <= 0;
+      end
+    end
+  end
+
+endmodule
+
+********* TESTBENCH CODE ************
+module testbench();
+  reg clk,rst;
+  wire q;
+  
+  pulse_generator tb(clk,rst,q);
+  
+  initial clk=0;
+  always #5 clk=~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Time=%0t | rst=%b | q=%b",$time,rst,q);
+    
+    rst=1;
+    #10 rst=0;
+    #200 $finish;
+  end
+endmodule
