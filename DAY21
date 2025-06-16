@@ -1,0 +1,56 @@
+// DEBOUNCER
+
+****** VERILOG CODE *******
+module debouncer #(parameter N = 2)(
+  input clk,
+  input rst,
+  input current_input,
+  output reg y
+);
+
+  reg [$clog2(N+1):0] count;  
+  reg prev_input;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      y <= 0;
+      count <= 0;
+      prev_input <= 0;
+    end else begin
+      if (current_input != prev_input) begin
+        count <= 0;
+        prev_input <= current_input;
+      end else if (count < N) begin
+        count <= count + 1;
+      end
+      
+      if (count == N) begin
+        y <= current_input;
+      end
+    end
+  end
+endmodule
+
+
+********* TESTBENCH CODE **********
+module tb;
+  reg clk = 0;
+  reg rst = 1;
+  reg din = 0;
+  wire dout;
+  
+  debouncer #(2) dut(clk, rst, din, dout);
+  
+  always #5 clk = ~clk;
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,tb);
+    $monitor("Time=%0t din=%b dout=%b count=%0d", $time, din, dout, dut.count);
+    
+    #10 rst = 0;
+    #10 din = 1;  
+    #50 din = 0; 
+    #50 $finish;
+  end
+endmodule
