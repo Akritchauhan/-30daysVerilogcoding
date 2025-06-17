@@ -1,0 +1,51 @@
+// IMPLEMENTATION OF ALU
+
+****** VERILOG CODE ****
+module ALU(a,b,sel,y);
+  input [3:0] a, b;
+  input [2:0] sel;
+  output reg [3:0] y;
+
+  always @(*) begin
+    case(sel)
+      3'b000: y = a + b;       // Addition
+      3'b001: y = a - b;       // Subtraction
+      3'b010: y = a & b;       // AND
+      3'b011: y = a | b;       // OR
+      3'b100: y = a ^ b;       // XOR
+      3'b101: y = a ^~ b;      // XNOR
+      3'b110: y = ~(a & b);    // NAND
+      3'b111: y = ~(a | b);    // NOR
+    endcase
+  end
+endmodule
+
+***** TESTBENCH CODE **********
+module testbench();
+  reg [3:0]a,b;
+  reg [2:0]sel;
+  wire [3:0]y;
+  
+  ALU tb(a,b,sel,y);
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    a=4'b0000;b=4'b1111;sel=3'b000;#10
+    a=4'b0000;b=4'b1111;sel=3'b001;#10
+    a=4'b0000;b=4'b1111;sel=3'b010;#10
+    a=4'b0000;b=4'b1111;sel=3'b011;#10
+    a=4'b0000;b=4'b1111;sel=3'b100;#10
+    a=4'b0000;b=4'b1111;sel=3'b101;#10
+    a=4'b0000;b=4'b1111;sel=3'b110;#10
+    a=4'b0000;b=4'b1111;sel=3'b111;#10
+    
+    #10 $finish;
+  end
+  initial begin
+    $monitor("A=%b | b=%b | sel=%b | output=%b",a,b,tb.sel,y);
+  end
+endmodule
+    
+    
