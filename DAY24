@@ -1,0 +1,50 @@
+//IMPLEMENTATION OF REVERSE CODE CONVERTER
+
+********  VERILOG CODE ***********
+module reverse_code_converter(g,b);
+  input[3:0]g;
+  output reg[3:0]b;
+  
+  always @(*)begin
+    b[3] = g[3];             
+    b[2] = g[3] ^ g[2];      
+    b[1] = g[2] ^ g[1];
+    b[0] = g[1] ^ g[0];
+  end
+endmodule
+
+********** TESTBENCH CODE **********
+module testbench();
+  reg [3:0]g;
+  wire [3:0]b;
+  
+  reverse_code_converter tb(g,b);
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+    
+    $monitor("Graycode=%b | Binary=%b ",g,b);
+    
+    g=4'b0000;#10
+    g=4'b0001;#10
+    g=4'b0010;#10
+    g=4'b0011;#10
+    g=4'b0100;#10
+    g=4'b0100;#10
+    g=4'b0110;#10
+    g=4'b0111;#10
+    g=4'b1000;#10
+    g=4'b1001;#10
+    g=4'b1010;#10
+    g=4'b1011;#10
+    g=4'b1100;#10
+    g=4'b1101;#10
+    g=4'b1110;#10
+    g=4'b1111;#10
+    $finish;
+  end
+endmodule
+    
+    
+    
