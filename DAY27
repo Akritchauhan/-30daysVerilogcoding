@@ -1,0 +1,105 @@
+//IMPLEMENTATION OF FIFO
+
+************ VERILOG CODE ***********
+module fifo #(parameter WIDTH = 8, parameter DEPTH = 16)(
+  input clk,
+  input rst,
+  input write_en,
+  input read_en,
+  input [WIDTH-1:0] data_in,
+  output reg [WIDTH-1:0] data_out,
+  output full,
+  output empty
+);
+
+  reg [WIDTH-1:0] memory [0:DEPTH-1];
+  reg [$clog2(DEPTH)-1:0] write_ptr;
+  reg [$clog2(DEPTH)-1:0] read_ptr;
+  reg [$clog2(DEPTH):0] data_count;
+
+  assign full  = (data_count == DEPTH);
+  assign empty = (data_count == 0);
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      write_ptr  <= 0;
+      read_ptr   <= 0;
+      data_count <= 0;
+    end else begin
+      if (write_en && !full) begin
+        memory[write_ptr] <= data_in;
+        write_ptr <= write_ptr + 1;
+        data_count <= data_count + 1;
+      end
+
+      if (read_en && !empty) begin
+        data_out <= memory[read_ptr];
+        read_ptr <= read_ptr + 1;
+        data_count <= data_count - 1;
+      end
+    end
+  end
+endmodule
+
+*********** TESTBENCH CODE ************
+module tb_fifo;
+
+  parameter WIDTH = 8;
+  parameter DEPTH = 16;
+
+  reg clk;
+  reg rst;
+  reg write_en;
+  reg read_en;
+  reg [WIDTH-1:0] data_in;
+  wire [WIDTH-1:0] data_out;
+  wire full;
+  wire empty;
+
+  fifo #(WIDTH, DEPTH) uut (
+    .clk(clk),
+    .rst(rst),
+    .write_en(write_en),
+    .read_en(read_en),
+    .data_in(data_in),
+    .data_out(data_out),
+    .full(full),
+    .empty(empty)
+  );
+
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk;
+  end
+
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1, tb_fifo);
+
+    rst = 1;
+    write_en = 0;
+    read_en = 0;
+    data_in = 0;
+    #10;
+
+    rst = 0;
+
+    write_en = 1;
+    for (int i = 0; i < 10; i++) begin
+      data_in = i * 3;
+      #10;
+      $display("Time=%0t | WRITE  | data_in=%0d | full=%b | empty=%b", $time, data_in, full, empty);
+    end
+    write_en = 0;
+
+    read_en = 1;
+    for (int i = 0; i < 10; i++) begin
+      #10;
+      $display("Time=%0t | READ   | data_out=%0d | full=%b | empty=%b", $time, data_out, full, empty);
+    end
+    read_en = 0;
+
+    $finish;
+  end
+
+endmodule
