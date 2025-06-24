@@ -1,0 +1,67 @@
+// IMPLEMENTATION OF PWM
+
+************* VERILOG CODE *************
+  module pwm #(parameter period = 8)(
+  input clk,
+  input rst,
+  input [$clog2(period)-1:0] duty,
+  output reg out
+);
+
+  reg [$clog2(period)-1:0] counter;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      counter <= 0;
+      out <= 0;
+    end
+    else begin
+      if (counter < duty)
+        out <= 1;
+      else
+        out <= 0;
+
+      if (counter == period - 1)
+        counter <= 0;
+      else
+        counter <= counter + 1;
+    end
+  end
+endmodule
+
+
+    ********** TESTBENCH CODE *********
+    module testbench();
+  parameter period = 8;
+  reg clk, rst;
+  reg [$clog2(period)-1:0] duty;
+  wire out;
+
+  pwm #(period) tb(clk, rst, duty, out);
+
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk; // 10ns clock period
+  end
+
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1, testbench);
+
+    rst = 1; duty = 0; #10;
+    rst = 0;
+
+    duty = 3; #100;   
+    duty = 5; #100;
+    duty = 7; #100;
+    duty = 1; #100;
+
+    $finish;
+  end
+
+  initial begin
+    $monitor("Time=%0t | duty=%d | out=%b", $time, duty, out);
+  end
+endmodule
+
+  
