@@ -1,0 +1,84 @@
+// IMPLEMENTATION OF MINI PROCESSOR
+
+******** VERILOG CODE ***********
+module ALU(input [7:0] a, b, input [2:0] sel, output reg [7:0] y);
+  always @(*) begin
+    case (sel)
+      3'b000: y = a + b;
+      3'b001: y = a - b;
+      3'b010: y = a & b;
+      3'b011: y = a | b;
+      3'b100: y = a ^ b;
+      3'b101: y = ~a;
+      3'b110: y = ~(a & b);
+      3'b111: y = ~(a | b);
+    endcase
+  end
+endmodule
+module register(input clk, rst, load, input [7:0] d, output reg [7:0] q);
+  always @(posedge clk or posedge rst) begin
+    if (rst)
+      q <= 8'b0;
+    else if (load)
+      q <= d;
+  end
+endmodule
+module mux(input [7:0] a, b, input sel, output [7:0] out);
+  assign out = sel ? b : a;
+endmodule
+
+module processor(
+  input clk, rst, load, mux_sel,
+  input [7:0] a, b,
+  input [2:0] alu_sel,
+  output [7:0] out
+);
+
+  wire [7:0] alu_out, reg_out;
+
+  ALU alu(.a(a), .b(b), .sel(alu_sel), .y(alu_out));
+  register reg1(.clk(clk), .rst(rst), .load(load), .d(alu_out), .q(reg_out));
+  mux m1(.a(reg_out), .b(b), .sel(mux_sel), .out(out));
+
+endmodule
+
+************ TESTBENCH CODE ****************
+module testbench();
+  reg clk, rst, load, mux_sel;
+  reg [7:0] a, b;
+  reg [2:0] alu_sel;
+  wire [7:0] out;
+
+  processor tb(clk, rst, load, mux_sel, a, b, alu_sel, out);
+
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk;
+  end
+
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1, testbench);
+
+    rst = 1; load = 0; mux_sel = 0; a = 0; b = 0; alu_sel = 0; #10;
+    rst = 0;
+
+    a = 8'd10; b = 8'd5; alu_sel = 3'b000; load = 1; #10;
+    load = 0; #10;
+
+    mux_sel = 0; #10;
+    mux_sel = 1; #10;
+
+    a = 8'd20; b = 8'd4; alu_sel = 3'b001; load = 1; #10;
+    load = 0; #10;
+
+    mux_sel = 0; #10;
+    mux_sel = 1; #10;
+
+    $finish;
+  end
+
+  initial begin
+    $monitor("Time=%0t | a=%d | b=%d | alu_sel=%b | mux_sel=%b | out=%d", $time, a, b, alu_sel, mux_sel, out);
+  end
+endmodule
